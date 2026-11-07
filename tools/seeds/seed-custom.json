@@ -1,0 +1,280 @@
+{
+ "xl-resume-auth": {
+  "state": {
+   "user": {
+    "id": "LOCAL0001",
+    "nickname": "本地用户",
+    "createdAt": 1759900000000
+   }
+  },
+  "version": 0
+ },
+ "xl-resume-data": {
+  "state": {
+   "resumes": [
+    {
+     "id": "sample-resume",
+     "name": "XX工程师-校招版",
+     "createdAt": 1791613493645,
+     "updatedAt": 1791613493645,
+     "basic": {
+      "avatar": "",
+      "name": "Resume-Pan",
+      "gender": "male",
+      "birthDate": "2002-01-01",
+      "showAgeOnly": true,
+      "workYears": "应届生",
+      "jobIntention": "XX算法工程师",
+      "phone": "138-XXXX-XXXX",
+      "email": "xxxx@example.com",
+      "politicalStatus": "XX党员",
+      "customFields": [
+       {
+        "id": "cf-1",
+        "icon": "Calendar",
+        "label": "实习时间",
+        "value": "2025.06 - 2025.09"
+       }
+      ]
+     },
+     "sections": [
+      {
+       "id": "sec-education-x-mv20ez65e9u8g5iy",
+       "type": "education",
+       "title": "教育背景",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-60g4ez",
+         "name": "XX大学",
+         "role": "XX专业",
+         "label": "学历",
+         "labelValue": "硕士",
+         "startDate": "2024-09",
+         "endDate": "2027-06",
+         "current": false,
+         "content": "<p>主修课程：XXX、XXX、XXX、XXX；GPA X.X/4.0，专业排名前 XX%。</p>"
+        },
+        {
+         "id": "sample-it-u1xgv3",
+         "name": "XX大学",
+         "role": "XX专业",
+         "label": "学历",
+         "labelValue": "本科",
+         "startDate": "2020-09",
+         "endDate": "2024-06",
+         "current": false,
+         "content": "<p>GPA X.X/4.0，专业排名前 XX%，连续三年获 XX 奖学金。</p>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-skills-x-mv20ez652wp17opp",
+       "type": "skills",
+       "title": "专业技能",
+       "visible": true,
+       "kind": "rich",
+       "items": [],
+       "content": "<ul>\n<li>熟悉 <strong>XXX、XXX</strong> 与 XXX 开发，掌握 XXX 与 XXX，熟练使用 XXX / XXX / XXX 工具链。</li>\n<li>熟悉 XXX 算法：<strong>XXX、XXX</strong>、XXX 与 XXX，具备 XXX 经验。</li>\n<li>熟悉 <strong>XXX / XXX</strong> 框架，具备 XXX 建模、XXX 与 XXX 实操经验。</li>\n<li>熟悉 XXX 前沿方向：XXX、<strong>XXX、XXX</strong>，了解 XXX 的完整流程。</li>\n<li>熟悉 <strong>XXX</strong> 工具，具备基于 XXX 的训练、优化与部署经验。</li>\n</ul>"
+      },
+      {
+       "id": "sec-work-x-mv20ez65ezlgbt06",
+       "type": "work",
+       "title": "工作经历",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "it-mv20ez656h09nmk8",
+         "name": "XX科技有限公司",
+         "role": "XX工程师",
+         "label": "",
+         "labelValue": "",
+         "startDate": "",
+         "endDate": "",
+         "current": false,
+         "content": "<p><strong>主要工作：</strong></p><ul><li>负责 XXX 模块的设计与开发，通过 XXX 优化使 XXX 提升 XX%。</li><li>主导 XXX 项目，解决 XXX 问题，将 XXX 降低 XX%。</li></ul>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-internship-x-mv20ez65g3dhj4hb",
+       "type": "internship",
+       "title": "实习经历",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-bs0ych",
+         "name": "XX科技有限公司",
+         "role": "XX实习生",
+         "label": "",
+         "labelValue": "",
+         "startDate": "2025-06",
+         "endDate": "2025-09",
+         "current": false,
+         "content": "<p><strong>主要工作：</strong></p>\n<ul>\n<li>参与 XXX 系统的开发与联调，独立完成 XXX 模块，XXX 成功率达 <strong>XX%</strong>。</li>\n<li>设计并实现基于 XXX 的 XXX 优化方案，将 XXX 降低 <strong>约 XX%</strong>。</li>\n<li>参与 XXX 数据链路建设，累计产出有效数据 <strong>XXX+ 条</strong>。</li>\n</ul>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-project-x-mv20ez65hsp7raqe",
+       "type": "project",
+       "title": "项目经历",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-w0stk6",
+         "name": "XX项目（面向 XXX 场景）",
+         "role": "核心开发",
+         "label": "",
+         "labelValue": "",
+         "startDate": "2024-09",
+         "endDate": "2025-05",
+         "current": false,
+         "content": "<p><strong>项目简介：</strong>面向 XXX 场景，基于 XXX 框架完成 XXX 的设计、训练与部署。</p>\n<p><strong>主要工作：</strong></p>\n<ul>\n<li>搭建 XXX 流水线，构建 <strong>XXX+ 条</strong>的自建数据集。</li>\n<li>基于 XXX 完成 XXX 任务，将成功率从 XX% 提升至 <strong>XX%</strong>。</li>\n<li>使用 XXX 完成 XXX 优化，XXX 从 XXms 降至 <strong>XXms</strong>。</li>\n</ul>\n<p><strong>技术栈：</strong>XXX、XXX、XXX、XXX</p>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-campus-x-mv20ez658zgl1ogt",
+       "type": "campus",
+       "title": "校园经历",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-5u471x",
+         "name": "XX社团 / 学生会",
+         "role": "XX职务",
+         "label": "",
+         "labelValue": "",
+         "startDate": "2025-06",
+         "endDate": "2026-05",
+         "current": false,
+         "content": "<p>统筹组织 XXX 活动 X 场，累计参与人数 XXX+。</p>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-award-x-mv20ez657jao0bti",
+       "type": "award",
+       "title": "获奖情况",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-43ox95",
+         "name": "XX竞赛 一等奖",
+         "role": "",
+         "label": "获奖日期",
+         "labelValue": "2023-08",
+         "startDate": "",
+         "endDate": "",
+         "current": false,
+         "content": ""
+        },
+        {
+         "id": "sample-it-zidl73",
+         "name": "XX竞赛 二等奖",
+         "role": "",
+         "label": "获奖日期",
+         "labelValue": "2024-11",
+         "startDate": "",
+         "endDate": "",
+         "current": false,
+         "content": ""
+        },
+        {
+         "id": "sample-it-z70z9r",
+         "name": "XX奖学金（连续三年）",
+         "role": "",
+         "label": "获奖日期",
+         "labelValue": "2021-2023",
+         "startDate": "",
+         "endDate": "",
+         "current": false,
+         "content": ""
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-research-x-mv20ez65cygofumd",
+       "type": "research",
+       "title": "科研经历",
+       "visible": true,
+       "kind": "list",
+       "items": [
+        {
+         "id": "sample-it-5drn9e",
+         "name": "XX研究方向",
+         "role": "核心成员",
+         "label": "",
+         "labelValue": "",
+         "startDate": "2024-10",
+         "endDate": "",
+         "current": true,
+         "content": "<p>研究方向为 <strong>XXX 与 XXX</strong>，参与 XXX 项目 X 项；以第 X 作者身份投稿 XXX 论文 X 篇，申请发明专利 X 项。</p>"
+        }
+       ],
+       "content": ""
+      },
+      {
+       "id": "sec-selfEval-x-mv20ez654c05wfqi",
+       "type": "selfEval",
+       "title": "自我评价",
+       "visible": true,
+       "kind": "rich",
+       "items": [],
+       "content": "<p>具备扎实的 XXX 基础，能够独立完成从 XXX、XXX 到 XXX 的完整闭环。对 XXX 有持续的研究热情，学习能力强、工程落地意识好，能在快节奏的团队中快速交付结果。</p>"
+      },
+      {
+       "id": "sec-custom-x-mv20ez656fi3ds3e",
+       "type": "custom",
+       "title": "自定义模块1",
+       "visible": true,
+       "kind": "rich",
+       "items": [],
+       "content": "<ul><li>校园开源社区核心贡献者，累计提交 120+ PR。</li></ul>"
+      },
+      {
+       "id": "sec-custom-x-mv20ez65r1atgkdc",
+       "type": "custom",
+       "title": "自定义模块2",
+       "visible": true,
+       "kind": "rich",
+       "items": [],
+       "content": "<ul><li>英语 CET-6 580 分，可无障碍阅读英文技术文档。</li></ul>"
+      }
+     ],
+     "style": {
+      "templateId": "tpl-01",
+      "theme": "blue",
+      "font": "default",
+      "fontScale": 1,
+      "language": "zh",
+      "layout": "center",
+      "infoMode": "icon",
+      "lineSpacing": "standard",
+      "spacing": {
+       "sectionGap": 16,
+       "lineHeight": 1.5,
+       "marginX": 46,
+       "marginTop": 30,
+       "marginBottom": 30
+      }
+     }
+    }
+   ]
+  },
+  "version": 0
+ }
+}

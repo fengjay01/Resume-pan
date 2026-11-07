@@ -1,0 +1,19 @@
+{
+  "name": "resume-pan-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Resume-Pan 桌面端（Electron 壳 + Web 版同款渲染/导出链路）",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "build": "npm --prefix app run build",
+    "start": "electron .",
+    "dev:vite": "npm --prefix app run dev",
+    "dev": "electron . --dev",
+    "smoke": "electron . --smoke",
+    "typecheck": "npm --prefix app run typecheck",
+    "test": "npm --prefix app run test"
+  },
+  "devDependencies": {
+    "electron": "^44.9.0"
+  }
+}

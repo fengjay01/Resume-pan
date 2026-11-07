@@ -1,0 +1,35 @@
+# 依赖（Web 版 / 桌面版 / 桌面版内的前端副本）
+node_modules/
+
+# 构建产物
+app/dist/
+desktop/app/dist/
+*.tsbuildinfo
+
+# 开发测试产生的临时文件
+shots/
+shot.png
+*.log
+shot-log.txt
+
+# 已下线的「pdf-lib 自绘矢量导出」遗留整字体（55MB，代码路径已删除）
+app/public/fonts/
+desktop/app/public/fonts/
+
+# 测试临时产物（由 tools/make-pdf-fixture.py、roundtrip 等生成）
+app/public/fixtures/
+desktop/app/public/fixtures/
+
+# 本地环境
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+
+# Agent 工作区数据（记忆/日志，不进仓库）
+.workbuddy/
+
+# Windows 保留名误创建的垃圾文件
+nul

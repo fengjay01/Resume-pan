@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #2563eb;
+  --page-bg: #f6f7f9;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: #1f2937;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+/* 细滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d7dbe2;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2c8d2;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 富文本编辑区 */
+.rich-editor {
+  min-height: 92px;
+  outline: none;
+  /* 与简历纸张保持一致的字体 / 字号 / 行高 / 内容宽度（由编辑器页面注入 CSS 变量），
+     保证「编辑区所见 = 预览 = 导出」三者格式一致 */
+  font-family: var(--resume-font, inherit);
+  font-size: var(--resume-fs, 14px);
+  line-height: var(--resume-line-height, 1.7);
+  max-width: calc(var(--resume-content-width, 100%) + 24px);
+  color: #000000;
+}
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+.rich-editor ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+.rich-editor ol {
+  list-style: decimal;
+  padding-left: 1.35rem;
+  margin: 0.25rem 0;
+}
+.rich-editor li {
+  margin: 0.1rem 0;
+}
+.rich-editor strong {
+  font-weight: 700;
+}
+.rich-editor em {
+  font-style: italic;
+}
+.rich-editor code {
+  background: #f1f3f7;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-family: Consolas, monospace;
+  font-size: 0.92em;
+}
+
+/* 简历纸张富文本渲染 */
+.resume-rich p {
+  margin: 0 0 0.25em;
+}
+.resume-rich ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 0.15em 0;
+}
+.resume-rich ol {
+  list-style: decimal;
+  padding-left: 1.6em;
+  margin: 0.15em 0;
+}
+.resume-rich li {
+  margin: 0.08em 0;
+}
+.resume-rich strong {
+  font-weight: 700;
+}
+.resume-rich em {
+  font-style: italic;
+}
+.resume-rich:last-child p:last-child {
+  margin-bottom: 0;
+}
+
+/* 粘贴内容里的版式元素：结构保留，字体一律跟随模板 */
+.resume-rich table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.15em 0;
+}
+.resume-rich td,
+.resume-rich th {
+  padding: 1px 0.4em;
+  vertical-align: top;
+}
+.resume-rich th {
+  font-weight: 700;
+  text-align: left;
+}
+.resume-rich code {
+  font-family: inherit;
+}
+.resume-rich hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.18);
+  margin: 0.35em 0;
+}
+.resume-rich blockquote {
+  margin: 0;
+}
+.resume-rich u,
+.resume-rich ins {
+  text-decoration: underline;
+}
+.resume-rich s,
+.resume-rich del,
+.resume-rich strike {
+  text-decoration: line-through;
+}
+.resume-rich sub {
+  vertical-align: sub;
+  font-size: 0.78em;
+}
+.resume-rich sup {
+  vertical-align: super;
+  font-size: 0.78em;
+}
+
+/* 粘贴内容里的版式元素：结构保留，字体一律跟随模板 */
+.resume-rich table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.15em 0;
+}
+.resume-rich td,
+.resume-rich th {
+  padding: 1px 0.4em;
+  vertical-align: top;
+}
+.resume-rich th {
+  font-weight: 700;
+  text-align: left;
+}
+.resume-rich code {
+  font-family: inherit;
+}
+.resume-rich hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.18);
+  margin: 0.35em 0;
+}
+.resume-rich blockquote {
+  margin: 0;
+}
+.resume-rich u,
+.resume-rich ins {
+  text-decoration: underline;
+}
+.resume-rich s,
+.resume-rich del,
+.resume-rich strike {
+  text-decoration: line-through;
+}
+.resume-rich sub {
+  vertical-align: sub;
+  font-size: 0.78em;
+}
+.resume-rich sup {
+  vertical-align: super;
+  font-size: 0.78em;
+}
+
+/* 打印 */
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  .h-4\.5 {
+    height: 1.125rem;
+  }
+  .w-4\.5 {
+    width: 1.125rem;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+}
