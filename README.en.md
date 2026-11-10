@@ -42,6 +42,7 @@ Resume-Pan is a free resume builder for engineers and technical professionals. I
 ├── desktop/                   Electron app (standalone copy, independent of app/)
 │   ├── app/                   Frontend copy; only the export service URL differs
 │   ├── electron/              Main process: static hosting + local export service
+│   ├── data/                  Runtime data (resumes, trash, preferences, port memory); generated, ignored
 │   ├── tools/                 Desktop-specific test scripts
 │   └── README-DESKTOP.md      Detailed desktop notes
 ├── tools/                     Dev & test scripts (not part of the build)
@@ -69,6 +70,7 @@ npm run dev          # http://127.0.0.1:5173
 npm test             # Logic regression: rendering / new entries / import parsing
 npm run typecheck    # TypeScript check
 npm run build        # Output to app/dist
+npm run preview      # Preview the production build: http://127.0.0.1:4173
 ```
 
 In dev mode a Vite plugin automatically starts `tools/export-service.mjs` (port 8790) for vector PDF export; a local Chrome / Edge installation is required. If the service is unavailable, export falls back to the browser print dialog.
@@ -91,16 +93,21 @@ cd desktop
 npm install                 # Electron
 npm --prefix app install    # Frontend dependencies
 npm run build               # tsc + vite build → desktop/app/dist
-npm start                   # Launch the app
+npm start                   # Launch the app (local service on port 8791 by default)
 npm run smoke               # Headless smoke test (/ping, /export)
 ```
 
-Dev mode needs two terminals: `npm run dev:vite` and `npm run dev`. See [desktop/README-DESKTOP.md](./desktop/README-DESKTOP.md) for single-instance locking, download location, data directory, and DevTools.
+Dev mode needs two terminals: `npm run dev:vite` and `npm run dev`.
+
+**Data directory**: by default data lives in the portable `desktop/data/` folder next to the app, so copying the whole `desktop/` folder carries your data with it, and nothing is written to the system user-data folder on C:. On first launch of a newer version, data from the old system directory (`%APPDATA%/resume-pan-desktop` on Windows) is migrated automatically, **including the remembered service port** — storage is isolated per origin, so a port change would make the resumes appear to vanish. This folder contains personal information, is listed in `.gitignore`, and must never be committed. Its location can be changed on the account page.
+
+See [desktop/README-DESKTOP.md](./desktop/README-DESKTOP.md) for single-instance locking, download location, and DevTools.
 
 ## Data & privacy
 
-- Resumes live in browser `localStorage` (key `xl-resume-data`), storing only the resume list and the trash; the desktop app persists them under Electron's `userData`
-- Clearing browser data, switching browsers, or using private mode will lose your resumes — export PDFs as backups
+- Resumes live in browser `localStorage` (key `xl-resume-data`), storing only the resume list and the trash; the desktop app persists them in the portable `desktop/data/` folder next to the app (never in the system user-data folder on C:), which can be changed on the account page. This folder holds personal data and is ignored by Git
+- Storage is isolated per origin: `127.0.0.1:5173` (web dev), `:4173` (production preview), and `:8791` (desktop) are three independent datasets. Not seeing your resumes after switching how you launch the app is expected
+- Clearing browser data, switching browsers, or using private mode will lose your resumes; export a JSON backup from the account page, or keep exported PDFs, which can be re-imported 1:1
 - No resume content is ever sent to a server; fonts, PDF.js, and OCR models are all local static assets
 - Deletion is soft-delete: trash entries are purged automatically after 30 days
 

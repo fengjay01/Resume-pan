@@ -29,40 +29,81 @@ const BASE_PORT = 8790;
 const IS_DEV = process.argv.includes('--dev');
 const IS_SMOKE = process.argv.includes('--smoke');
 
-/* --------------------- 自定义数据存储文件夹（桌面端设置） --------------------- */
+/* --------------------- 数据存储文件夹（桌面端设置） --------------------- */
 /* 简历数据存在 Chromium 的 Local Storage（leveldb）里，随 userData 目录走。
- * 用户在账号页选择新文件夹后写入 data-folder.json（固定放在**默认** userData，
- * 与当前是否已重定向无关），下次启动在此处应用重定向；migrate 标记触发一次性
- * 把默认目录的 Local Storage 复制过去（仅当目标还没有数据时，绝不覆盖）。 */
-const DEFAULT_USER_DATA = app.getPath('userData');
+ * 默认目录改为应用目录下的 data/：整个 desktop/ 拷走就带走数据，不占 C 盘。
+ * 旧版本把数据放在系统 userData（Windows 下为 %APPDATA%/resume-pan-desktop），
+ * 首次以新版本启动时一次性迁移核心数据到 data/，并**保留原服务端口**——
+ * 端口变了 origin 就变，LevelDB 里的简历会「消失」。迁移标记写在旧目录，
+ * 避免日后清空 data/ 又被旧数据回填；目标已有数据时绝不覆盖。
+ *
+ * 账号页仍可指定任意文件夹：配置 data-folder.json 固定放在默认目录 data/，
+ * 与当前是否已重定向无关；migrate 标记触发一次性复制 Local Storage。 */
+const LEGACY_USER_DATA = app.getPath('userData');
+const DEFAULT_USER_DATA = path.join(__dirname, '..', 'data');
 const DATA_FOLDER_CONFIG = path.join(DEFAULT_USER_DATA, 'data-folder.json');
+const LEGACY_CONFIG = path.join(LEGACY_USER_DATA, 'data-folder.json');
+const LEGACY_MIGRATION_MARKER = path.join(LEGACY_USER_DATA, '.migrated-to-portable');
 
 function readDataFolderConfig() {
-  try {
-    const cfg = JSON.parse(fs.readFileSync(DATA_FOLDER_CONFIG, 'utf8'));
-    if (cfg && typeof cfg.target === 'string' && path.isAbsolute(cfg.target)) return cfg;
-  } catch { /* 无配置或损坏：按默认处理 */ }
+  for (const p of [DATA_FOLDER_CONFIG, LEGACY_CONFIG]) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (cfg && typeof cfg.target === 'string' && path.isAbsolute(cfg.target)) return cfg;
+    } catch { /* 无配置或损坏：尝试下一个 / 按默认处理 */ }
+  }
   return null;
 }
 
-function applyCustomDataFolder() {
-  const cfg = readDataFolderConfig();
-  if (!cfg) return;
+/** 把旧系统目录里的核心数据迁到便携目录；只执行一次，绝不覆盖目标已有数据。 */
+function migrateLegacyData() {
   try {
-    if (cfg.migrate) {
+    if (!fs.existsSync(LEGACY_USER_DATA) || fs.existsSync(LEGACY_MIGRATION_MARKER)) return;
+    const legacyStorage = path.join(LEGACY_USER_DATA, 'Local Storage');
+    const portableStorage = path.join(DEFAULT_USER_DATA, 'Local Storage');
+    if (fs.existsSync(legacyStorage) && !fs.existsSync(portableStorage)) {
+      fs.cpSync(legacyStorage, portableStorage, { recursive: true });
+      for (const name of ['Session Storage']) {
+        const src = path.join(LEGACY_USER_DATA, name);
+        const dst = path.join(DEFAULT_USER_DATA, name);
+        if (fs.existsSync(src) && !fs.existsSync(dst)) fs.cpSync(src, dst, { recursive: true });
+      }
+      // service-port.txt 必须一起迁：origin 变了 LevelDB 里的数据就读不到
+      for (const name of ['service-port.txt', 'Preferences', 'Local State']) {
+        const src = path.join(LEGACY_USER_DATA, name);
+        const dst = path.join(DEFAULT_USER_DATA, name);
+        if (fs.existsSync(src) && !fs.existsSync(dst)) fs.copyFileSync(src, dst);
+      }
+      console.log(`[desktop] 已从旧目录迁移数据：${LEGACY_USER_DATA} -> ${DEFAULT_USER_DATA}`);
+    }
+    // 无论是否真的复制都打标记，避免以后清空 data/ 又被旧数据回填
+    fs.writeFileSync(LEGACY_MIGRATION_MARKER, new Date().toISOString());
+  } catch (e) {
+    console.error('[desktop] 旧数据迁移失败（继续使用便携目录）：', e);
+  }
+}
+
+function applyDataFolder() {
+  try {
+    fs.mkdirSync(DEFAULT_USER_DATA, { recursive: true });
+    migrateLegacyData();
+
+    const cfg = readDataFolderConfig();
+    const target = cfg ? cfg.target : DEFAULT_USER_DATA;
+    if (cfg && cfg.migrate) {
       const src = path.join(DEFAULT_USER_DATA, 'Local Storage');
-      const dst = path.join(cfg.target, 'Local Storage');
+      const dst = path.join(target, 'Local Storage');
       if (fs.existsSync(src) && !fs.existsSync(dst)) {
         fs.cpSync(src, dst, { recursive: true });
       }
       // 迁移只执行一次，写回不含 migrate 的配置
-      fs.writeFileSync(DATA_FOLDER_CONFIG, JSON.stringify({ target: cfg.target }, null, 2));
+      fs.writeFileSync(DATA_FOLDER_CONFIG, JSON.stringify({ target }, null, 2));
     }
-    fs.mkdirSync(cfg.target, { recursive: true });
-    app.setPath('userData', cfg.target);
-    console.log(`[desktop] 数据目录：${cfg.target}`);
+    fs.mkdirSync(target, { recursive: true });
+    app.setPath('userData', target);
+    console.log(`[desktop] 数据目录：${target}`);
   } catch (e) {
-    console.error('[desktop] 自定义数据目录应用失败，使用默认目录：', e);
+    console.error('[desktop] 数据目录应用失败，使用系统默认目录：', e);
   }
 }
 
@@ -462,7 +503,8 @@ if (!gotLock) {
   app.quit();
 } else {
   // 必须在 ready 之前重定向 userData（Local Storage 随目录走）
-  applyCustomDataFolder();
+  // 默认指向应用内的 data/；旧系统目录的数据会在这里一次性迁移过来
+  applyDataFolder();
 
   app.on('second-instance', () => {
     if (mainWindow) {

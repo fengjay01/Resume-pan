@@ -31,5 +31,8 @@ Thumbs.db
 # Agent 工作区数据（记忆/日志，不进仓库）
 .workbuddy/
 
+# 桌面端运行数据（简历 / 回收站 / 偏好 / 端口记忆，含个人信息，绝不入库）
+desktop/data/
+
 # Windows 保留名误创建的垃圾文件
 nul

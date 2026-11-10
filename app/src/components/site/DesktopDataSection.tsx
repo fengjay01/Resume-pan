@@ -6,9 +6,10 @@ import { Modal } from '@/components/common/Modal';
 /**
  * 桌面端专属：数据存储位置设置（Web 端不渲染）。
  *
- * 简历数据随 Electron 的 userData 目录走（Local Storage/leveldb）。选择新文件夹
- * 写入 data-folder.json 后**重启应用**生效；可选一次性迁移现有数据（主进程在
- * 启动早期、任何存储子系统打开之前复制 Local Storage，绝不覆盖目标已有数据）。
+ * 简历数据随 Electron 的 userData 目录走（Local Storage/leveldb），默认在应用目录的
+ * data/ 下（便携，不占 C 盘）。选择新文件夹写入 data-folder.json 后**重启应用**生效；
+ * 可选一次性迁移现有数据（主进程在启动早期、任何存储子系统打开之前复制 Local
+ * Storage，绝不覆盖目标已有数据）。
  */
 
 /** 主进程注入的桌面端设置 API（见 desktop/electron/preload.cjs） */
