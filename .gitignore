@@ -11,8 +11,6 @@ desktop/app/dist/
 desktop/build-output/
 desktop/.build-env/
 desktop/release/
-# 重复的本地资产副本（约 505MB），不是交付目录，勿入库
-desktop/releases/
 *.tsbuildinfo
 
 # 开发测试产生的临时文件
