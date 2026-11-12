@@ -42,9 +42,9 @@ node tools/verify-release.mjs   # 产物自检：/ping、/export PDF、便携 da
 
 **Windows 直接用本地 Windows electron-builder 打包发布**，不依赖 CI：跑完
 `npm run pack:win`，用 `gh release create`（走 GitHub API）把 `desktop/release/` 资产上传到
-Release 即可。本机 `git push` 到 github.com 常被代理拦成 502，但 `api.github.com` /
-`uploads.github.com` 通畅，因此发布资产不受影响；代码提交需另找可用网络。
-当前版本 **0.1.0**（2026-11-12 已发布首个 Release）。
+Release 即可。发布当时 `git push` 到 github.com 曾被本机代理拦成 502（稍后重试即通），
+`api.github.com` / `uploads.github.com` 全程可用；**代码已提交并推送**，tag `v0.1.0`
+与 `main` 保持一致。当前版本 **0.1.0**（2026-11-12 已发布首个 Release）。
 
 ### 目录分层：所有产物 / 下载 / 缓存都在项目目录内，绝不写 C 盘
 
