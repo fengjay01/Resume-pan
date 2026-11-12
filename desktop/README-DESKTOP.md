@@ -46,6 +46,21 @@ Release 即可。发布当时 `git push` 到 github.com 曾被本机代理拦成
 `api.github.com` / `uploads.github.com` 全程可用；**代码已提交并推送**，tag `v0.1.0`
 与 `main` 保持一致。当前版本 **0.1.0**（2026-11-12 已发布首个 Release）。
 
+**Release 命名约定**：tag 与显示标题都用**纯版本号** `v<版本>`（如 `v0.1.0`），
+不加产品名前缀；说明正文首行也写 `# v<版本>`。以后每个版本照此办理：
+
+```bash
+cd desktop
+gh release create v0.2.0 --repo fengjay01/Resume-pan --target main \
+  --title "v0.2.0" --notes-file .build-env/release-notes.md \
+  releases/v0.2.0/*.exe releases/v0.2.0/*.blockmap releases/v0.2.0/*.7z
+```
+
+`--target main` 让 tag 落在当前主分支；若要让 tag 指向某次特定提交，换成完整 SHA。
+修改已发布 Release 的标题用 `gh release edit v0.1.0 --title "v0.1.0"`，
+移动 tag 用 `gh api -X PATCH .../git/refs/tags/v0.1.0 -f sha=<SHA> -F force=true`
+并同步 `PATCH .../releases/{id}` 的 `target_commitish`（资产不受影响）。
+
 ### 目录分层：所有产物 / 下载 / 缓存都在项目目录内，绝不写 C 盘
 
 ```
