@@ -28,7 +28,7 @@ Resume-Pan 是面向技术从业者的免费简历制作工具。纯前端实现
 | PDF | PDF.js 6（解析）· jsPDF + html2canvas（图片版导出）· 浏览器 `printToPDF`（矢量导出） |
 | OCR | Tesseract.js 7 + 简体中文模型（仅扫描件） |
 | 桌面端 | Electron 44（Chromium 152），隐藏 BrowserWindow + `webContents.printToPDF` |
-| 打包 | electron-builder 26（仅 Windows，本地构建），产物输出到 `desktop/release/` |
+| 打包 | electron-builder 26（仅 Windows，本地构建），产物输出到 `desktop/releases/v<版本>/` |
 
 ## 目录结构
 
@@ -56,7 +56,8 @@ Resume-Pan 是面向技术从业者的免费简历制作工具。纯前端实现
 │   │   ├── cache/npm/          npm / npx 缓存
 │   │   ├── tmp/                构建期 TMP / TEMP
 │   │   └── out/<arch>/         electron-builder 原始输出
-│   ├── release/               交付层：最终发布资产（已忽略）
+│   ├── releases/              交付层：按版本归档（已忽略）
+│   │   └── v0.1.0/            该版本全部资产；以后每版一个 v<版本>/ 目录
 │   ├── data/                  开发版运行数据（简历 / 回收站 / 偏好 / 端口记忆，已忽略）
 │   ├── electron-builder.yml   打包配置（仅 Windows）
 │   └── README-DESKTOP.md      桌面版详细说明
@@ -125,13 +126,17 @@ npm --prefix app install    # 前端依赖
 npm run build               # tsc + vite build → desktop/app/dist
 npm start                   # 启动应用（本地服务从 8790 起顺延探测）
 npm run smoke               # 无窗口冒烟（/ping、/export）
-npm run pack:win            # 构建 Windows x64 / arm64 Release → desktop/release/
+npm run pack:win            # 构建 Windows x64 / arm64 Release → desktop/releases/v<版本>/
 node tools/verify-release.mjs --out=.build-env/out   # 产物自检
 ```
 
 开发模式需要两个终端：`npm run dev:vite` 与 `npm run dev`。
 
-**目录分层与零 C 盘写入**：打包时所有下载、缓存、临时文件与原始输出都落在 `desktop/.build-env/`（Electron 二进制、NSIS 工具、npm 缓存、TMP/TEMP、逐架构输出），最终资产只进 `desktop/release/`。`tools/pack-release.mjs` 用环境变量和 CLI 覆盖把这些路径锁在项目内，`.npmrc` 与 `.gitignore` 兜底；实测构建前后 C 盘各缓存目录大小零变化。
+**目录分层与零 C 盘写入**：打包时所有下载、缓存、临时文件与原始输出都落在 `desktop/.build-env/`（Electron 二进制、NSIS 工具、npm 缓存、TMP/TEMP、逐架构输出），最终资产只进 `desktop/releases/v<版本>/`。`tools/pack-release.mjs` 用环境变量和 CLI 覆盖把这些路径锁在项目内，`.npmrc` 与 `.gitignore` 兜底；实测构建前后 C 盘各缓存目录大小零变化。
+
+**按版本归档 / 升级迭代**：最终资产统一放 `desktop/releases/v<版本>/`，如当前的 `v0.1.0/`。
+升级时改 `package.json` 的 `version` 再跑 `npm run pack:win`，会自动新建对应版本目录，
+旧版本目录原样保留；`node tools/verify-release.mjs --version=0.1.0` 可自检任意历史版本。
 
 **数据目录**：开发版在 `desktop/data/`；打包版（安装版与绿色版）一律 exe 同级 `data/`，都不写 C 盘系统目录。旧系统目录（Windows 下 `%APPDATA%/resume-pan-desktop`）只作**只读**迁移源，迁移标记写在目标目录；迁移会带上 `service-port.txt`——本地存储按 origin 隔离，端口一变简历就会「读不到」。该目录含个人信息，已加入 `.gitignore`，切勿提交；可用环境变量 `RESUME_PAN_DATA_DIR` 或在账号页「数据存储位置」更改。
 

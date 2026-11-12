@@ -28,7 +28,7 @@ Windows installers are published on [GitHub Releases](https://github.com/fengjay
 | PDF | PDF.js 6 (parsing) · jsPDF + html2canvas (image export) · browser `printToPDF` (vector export) |
 | OCR | Tesseract.js 7 with the Simplified Chinese model (scans only) |
 | Desktop | Electron 44 (Chromium 152), hidden BrowserWindow + `webContents.printToPDF` |
-| Packaging | electron-builder 26 (Windows only, built locally), output in `desktop/release/` |
+| Packaging | electron-builder 26 (Windows only, built locally), output in `desktop/releases/v<version>/` |
 
 ## Repository layout
 
@@ -56,7 +56,8 @@ Windows installers are published on [GitHub Releases](https://github.com/fengjay
 │   │   ├── cache/npm/         npm / npx cache
 │   │   ├── tmp/               Build-time TMP / TEMP
 │   │   └── out/<arch>/        Raw electron-builder output
-│   ├── release/               Delivery layer: final release assets (ignored)
+│   ├── releases/              Delivery layer: versioned archives (ignored)
+│   │   └── v0.1.0/            All assets for this version; one v<version>/ per release
 │   ├── data/                  Dev-mode runtime data (resumes / trash / preferences / port memory; ignored)
 │   ├── electron-builder.yml   Build config (Windows only)
 │   └── README-DESKTOP.md      Detailed desktop notes
@@ -125,13 +126,15 @@ npm --prefix app install    # Frontend dependencies
 npm run build               # tsc + vite build → desktop/app/dist
 npm start                   # Launch the app (local service probes from port 8790)
 npm run smoke               # Headless smoke test (/ping, /export)
-npm run pack:win            # Build Windows x64 / arm64 release → desktop/release/
+npm run pack:win            # Build Windows x64 / arm64 release → desktop/releases/v<version>/
 node tools/verify-release.mjs --out=.build-env/out   # Verify artifacts
 ```
 
 Dev mode needs two terminals: `npm run dev:vite` and `npm run dev`.
 
-**Layered directories, zero writes to C:** all downloads, caches, temp files and raw build output stay in `desktop/.build-env/` (Electron archives, NSIS tools, npm cache, TMP/TEMP, per-arch output); only final assets go to `desktop/release/`. `tools/pack-release.mjs` pins these paths inside the project via environment variables and CLI overrides, with `.npmrc` and `.gitignore` as a fallback. Measured before/after: no size change in any C: cache directory.
+**Layered directories, zero writes to C:** all downloads, caches, temp files and raw build output stay in `desktop/.build-env/` (Electron archives, NSIS tools, npm cache, TMP/TEMP, per-arch output); only final assets go to `desktop/releases/v<version>/`. `tools/pack-release.mjs` pins these paths inside the project via environment variables and CLI overrides, with `.npmrc` and `.gitignore` as a fallback. Measured before/after: no size change in any C: cache directory.
+
+**Versioned archives / upgrading**: final assets live in `desktop/releases/v<version>/` (`v0.1.0/` today). Bump `version` in `package.json` and run `npm run pack:win` — a new version folder is created and older ones are left untouched. Use `node tools/verify-release.mjs --version=0.1.0` to verify any historical version.
 
 **Data directory**: dev builds use `desktop/data/`; packaged builds (installer and portable alike) always use `data/` next to the executable — neither writes to the system user-data folder on C:. The old system folder (`%APPDATA%/resume-pan-desktop` on Windows) is a **read-only** migration source, with the migration marker written to the destination. Migration carries `service-port.txt` too: storage is isolated per origin, so a port change makes resumes appear to vanish. This folder contains personal information, is listed in `.gitignore`, and must never be committed. Override it with `RESUME_PAN_DATA_DIR` or from the account page.
 

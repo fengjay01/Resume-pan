@@ -1,5 +1,5 @@
 # electron-builder 发行配置：现阶段只发布 Windows（x64 / arm64），本地直接打包。
-# 发布链路：cd desktop && npm run pack:win -> desktop/release/ -> 手动上传 Release。
+# 发布链路：cd desktop && npm run pack:win -> desktop/releases/v<版本>/ -> 手动上传 Release。
 # GitHub Actions 三端自动发布为后续计划，当前不启用。
 #
 # 【零 C 盘写入】所有下载/缓存/临时/产物都在项目内，由 tools/pack-release.mjs 注入

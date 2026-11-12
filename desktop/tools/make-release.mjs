@@ -5,7 +5,8 @@
  *  - 用 <arch>/win-*-unpacked 打绿色便携 7z，并注入 portable.txt
  *  - 产出 SHA256SUMS.txt 与 manifest.json（大小 / 校验和 / 平台 / 架构 / 类型）
  *
- * 【目录分层】读取 .build-env/out/<arch>/ 下的原始产物，只把最终资产写进 release/。
+ * 【目录分层】读取 .build-env/out/<arch>/ 下的原始产物，只把最终资产写进
+ * releases/v<版本>/（按版本归档；升级时改 package.json 的 version 即自动新建目录）。
  * 逐架构独立构建后每个子目录各有一份 latest.yml / builder-debug.yml，按架构改名避免覆盖。
  * 可重复运行：原始产物保留在 .build-env/out/，整理步骤随时可重跑。
  */
@@ -20,10 +21,13 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outArg = process.argv.find((x) => x.startsWith('--out='));
 const OUT = path.join(ROOT, outArg ? outArg.slice('--out='.length) : '.build-env/out');
-const RELEASE = path.join(ROOT, 'release');
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const NAME = pkg.name;
 const VERSION = pkg.version;
+// 【按版本归档】最终资产统一放 desktop/releases/v<版本>/。
+// 升级迭代只需改 package.json 的 version 再跑 pack:win，会自动新建对应目录；
+// 历史版本目录原样保留，互不覆盖。
+const RELEASE = path.join(ROOT, 'releases', `v${VERSION}`);
 const ONLY = (() => {
   const a = process.argv.find((x) => x.startsWith('--only='));
   return a ? a.slice('--only='.length) : 'all';

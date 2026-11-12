@@ -10,7 +10,7 @@ app/dist/
 desktop/app/dist/
 desktop/build-output/
 desktop/.build-env/
-desktop/release/
+desktop/releases/
 *.tsbuildinfo
 
 # 开发测试产生的临时文件

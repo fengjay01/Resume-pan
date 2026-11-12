@@ -41,7 +41,7 @@ node tools/verify-release.mjs   # 产物自检：/ping、/export PDF、便携 da
 ```
 
 **Windows 直接用本地 Windows electron-builder 打包发布**，不依赖 CI：跑完
-`npm run pack:win`，用 `gh release create`（走 GitHub API）把 `desktop/release/` 资产上传到
+`npm run pack:win`，用 `gh release create`（走 GitHub API）把 `desktop/releases/v<版本>/` 里的资产上传到
 Release 即可。发布当时 `git push` 到 github.com 曾被本机代理拦成 502（稍后重试即通），
 `api.github.com` / `uploads.github.com` 全程可用；**代码已提交并推送**，tag `v0.1.0`
 与 `main` 保持一致。当前版本 **0.1.0**（2026-11-12 已发布首个 Release）。
@@ -62,7 +62,8 @@ desktop/
 │   ├── cache/npm/          npm / npx 缓存（npm_config_cache）
 │   ├── tmp/                构建与运行期 TMP / TEMP
 │   └── out/<arch>/         electron-builder 原始输出（x64/、arm64/ 各自独立）
-└── release/                【交付层】唯一对外发布的资产目录
+└── releases/               【交付层】按版本归档（已 gitignore）
+    └── v0.1.0/            该版本全部资产；以后每版一个 v<版本>/ 目录
 ```
 
 `tools/pack-release.mjs` 在构建子进程统一注入 `ELECTRON_BUILDER_CACHE`、
@@ -72,12 +73,17 @@ desktop/
 `tools/verify-release.mjs` 运行 exe 时同样把临时目录指向项目内。
 **运行时数据也不再写系统 AppData**：打包版一律 exe 同级 `data/`，旧系统目录只作只读迁移源。
 
+**按版本归档（升级迭代）**：`tools/make-release.mjs` 按 `package.json` 的 `version` 把资产
+写到 `desktop/releases/v<版本>/`（当前 `v0.1.0/`），`SHA256SUMS.txt` 与 `manifest.json`
+也在该目录内。升级时改 `version` 再跑 `npm run pack:win` 即自动新建版本目录，旧版本
+原样保留；`node tools/verify-release.mjs --version=0.1.0` 可自检任意历史版本。
+
 ### 最小化打包（已启用）
 
 | 措施 | 效果 |
 | --- | --- |
 | 逐架构独立构建（`--win --x64` / `--win --arm64` 分开跑） | 不再产出 315MB 的 universal 双架构安装包 |
-| `pruneDist()` 删除 511 个 `.woff`（16.8MB） | CSS 720 个 `@font-face` 全部 woff2 优先，0 个只引用 woff，字形不回退 |
+| `files` 白名单排除 511 个 `.woff`（16.8MB）+ `pruneDist()` 改写 CSS | CSS 720 个 `@font-face` 全部 woff2 优先，0 个只引用 woff；不删源文件、只挡在 asar 外，字形不回退 |
 | `compression: maximum` + 绿色版 7z `-mx=9 -ms=on` | NSIS 内置 7z/LZMA 与固实归档用最高压缩级别 |
 | `electronLanguages: [zh-CN, en-US]` | 清掉 Electron 自带的其余几十种 locale.pak |
 | `files` 白名单 + 排除 `*.map` / `*.woff` | 源码、node_modules、sourcemap 不进 asar |
