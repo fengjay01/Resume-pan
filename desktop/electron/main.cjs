@@ -31,22 +31,61 @@ const IS_SMOKE = process.argv.includes('--smoke');
 
 /* --------------------- 数据存储文件夹（桌面端设置） --------------------- */
 /* 简历数据存在 Chromium 的 Local Storage（leveldb）里，随 userData 目录走。
- * 默认目录改为应用目录下的 data/：整个 desktop/ 拷走就带走数据，不占 C 盘。
- * 旧版本把数据放在系统 userData（Windows 下为 %APPDATA%/resume-pan-desktop），
- * 首次以新版本启动时一次性迁移核心数据到 data/，并**保留原服务端口**——
- * 端口变了 origin 就变，LevelDB 里的简历会「消失」。迁移标记写在旧目录，
+ * 【零 C 盘写入】数据目录一律跟随应用目录，绝不主动写系统 AppData：
+ *  ① 开发版（npm start）：desktop/data/；
+ *  ② 打包版（绿色 7z 与 NSIS 安装版都一样）：exe 同级 data/，整个安装目录可拷走；
+ *  ③ 显式覆盖：环境变量 RESUME_PAN_DATA_DIR（绝对路径）或账号页 data-folder.json。
+ * 注意：打包后 __dirname 位于 resources/app.asar 内（只读），绝不能把数据写进去；
+ * 也绝不调用 probeWritable(系统目录)——那会在 C 盘创建目录并写入探针文件。
+ * 旧系统目录只作为「只读」迁移源（不创建、不写迁移标记），迁移标记改写在目标目录，
  * 避免日后清空 data/ 又被旧数据回填；目标已有数据时绝不覆盖。
- *
- * 账号页仍可指定任意文件夹：配置 data-folder.json 固定放在默认目录 data/，
- * 与当前是否已重定向无关；migrate 标记触发一次性复制 Local Storage。 */
-const LEGACY_USER_DATA = app.getPath('userData');
-const DEFAULT_USER_DATA = path.join(__dirname, '..', 'data');
+ * 迁移必须带上 service-port.txt：端口变了 origin 就变，LevelDB 里的简历会「消失」。 */
+const IS_PACKAGED = app.isPackaged;
+const EXE_DIR = IS_PACKAGED ? path.dirname(app.getPath('exe')) : path.join(__dirname, '..');
+const IS_PORTABLE = IS_PACKAGED && fs.existsSync(path.join(EXE_DIR, 'portable.txt'));
+const APP_DATA_NAME = 'resume-pan-desktop';
+const LEGACY_USER_DATA = app.getPath('userData'); // 打包后按 productName 的默认 userData
+const SYSTEM_USER_DATA = path.join(app.getPath('appData'), APP_DATA_NAME); // 与旧开发版同名
+const LEGACY_SOURCES = [SYSTEM_USER_DATA, LEGACY_USER_DATA];
+const MIGRATION_MARKER = '.migrated-from';   // 前缀，完整文件名带源目录名，写在目标目录内
+
+/** 目录可写性探测：安装到 Program Files 之类的只读位置时回退系统目录。 */
+function probeWritable(dir) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    const probe = path.join(dir, '.write-probe');
+    fs.writeFileSync(probe, '1');
+    fs.unlinkSync(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function resolveDefaultUserData() {
+  if (!IS_PACKAGED) return path.join(__dirname, '..', 'data');
+  // 允许显式指定（例如把数据放到项目盘的固定目录）
+  const override = process.env.RESUME_PAN_DATA_DIR;
+  if (override && path.isAbsolute(override) && probeWritable(override)) return override;
+  // 打包版一律 exe 同级 data/；不再回退到 %APPDATA% 等系统目录（C 盘）。
+  const local = path.join(EXE_DIR, 'data');
+  if (!probeWritable(local)) {
+    console.error('[desktop] 应用目录不可写：请把应用安装/解压到可写目录，' +
+      '或设置环境变量 RESUME_PAN_DATA_DIR 指向一个可写目录。');
+  }
+  return local;
+}
+
+const DEFAULT_USER_DATA = resolveDefaultUserData();
 const DATA_FOLDER_CONFIG = path.join(DEFAULT_USER_DATA, 'data-folder.json');
-const LEGACY_CONFIG = path.join(LEGACY_USER_DATA, 'data-folder.json');
-const LEGACY_MIGRATION_MARKER = path.join(LEGACY_USER_DATA, '.migrated-to-portable');
+const CONFIG_CANDIDATES = [
+  DATA_FOLDER_CONFIG,
+  path.join(SYSTEM_USER_DATA, 'data-folder.json'),
+  path.join(LEGACY_USER_DATA, 'data-folder.json'),
+];
 
 function readDataFolderConfig() {
-  for (const p of [DATA_FOLDER_CONFIG, LEGACY_CONFIG]) {
+  for (const p of CONFIG_CANDIDATES) {
     try {
       const cfg = JSON.parse(fs.readFileSync(p, 'utf8'));
       if (cfg && typeof cfg.target === 'string' && path.isAbsolute(cfg.target)) return cfg;
@@ -55,31 +94,41 @@ function readDataFolderConfig() {
   return null;
 }
 
-/** 把旧系统目录里的核心数据迁到便携目录；只执行一次，绝不覆盖目标已有数据。 */
+/** 迁移标记写在目标目录（项目内），源系统目录全程只读，绝不往 C 盘写任何东西。 */
+function markerFileFor(srcDir) {
+  const tag = path.basename(srcDir).replace(/[^a-z0-9_-]/gi, '_');
+  return path.join(DEFAULT_USER_DATA, `${MIGRATION_MARKER}-${tag}`);
+}
+
+/** 把旧系统目录里的核心数据迁到当前默认目录；每个源只执行一次，绝不覆盖目标已有数据。 */
 function migrateLegacyData() {
-  try {
-    if (!fs.existsSync(LEGACY_USER_DATA) || fs.existsSync(LEGACY_MIGRATION_MARKER)) return;
-    const legacyStorage = path.join(LEGACY_USER_DATA, 'Local Storage');
-    const portableStorage = path.join(DEFAULT_USER_DATA, 'Local Storage');
-    if (fs.existsSync(legacyStorage) && !fs.existsSync(portableStorage)) {
-      fs.cpSync(legacyStorage, portableStorage, { recursive: true });
-      for (const name of ['Session Storage']) {
-        const src = path.join(LEGACY_USER_DATA, name);
-        const dst = path.join(DEFAULT_USER_DATA, name);
-        if (fs.existsSync(src) && !fs.existsSync(dst)) fs.cpSync(src, dst, { recursive: true });
+  const portableStorage = path.join(DEFAULT_USER_DATA, 'Local Storage');
+  for (const srcDir of LEGACY_SOURCES) {
+    try {
+      if (path.normalize(srcDir) === path.normalize(DEFAULT_USER_DATA)) continue;
+      const marker = markerFileFor(srcDir);
+      if (!fs.existsSync(srcDir) || fs.existsSync(marker)) continue;
+      const legacyStorage = path.join(srcDir, 'Local Storage');
+      if (fs.existsSync(legacyStorage) && !fs.existsSync(portableStorage)) {
+        fs.cpSync(legacyStorage, portableStorage, { recursive: true });
+        for (const name of ['Session Storage']) {
+          const src = path.join(srcDir, name);
+          const dst = path.join(DEFAULT_USER_DATA, name);
+          if (fs.existsSync(src) && !fs.existsSync(dst)) fs.cpSync(src, dst, { recursive: true });
+        }
+        // service-port.txt 必须一起迁：origin 变了 LevelDB 里的数据就读不到
+        for (const name of ['service-port.txt', 'Preferences', 'Local State']) {
+          const src = path.join(srcDir, name);
+          const dst = path.join(DEFAULT_USER_DATA, name);
+          if (fs.existsSync(src) && !fs.existsSync(dst)) fs.copyFileSync(src, dst);
+        }
+        console.log(`[desktop] 已从旧目录迁移数据：${srcDir} -> ${DEFAULT_USER_DATA}`);
       }
-      // service-port.txt 必须一起迁：origin 变了 LevelDB 里的数据就读不到
-      for (const name of ['service-port.txt', 'Preferences', 'Local State']) {
-        const src = path.join(LEGACY_USER_DATA, name);
-        const dst = path.join(DEFAULT_USER_DATA, name);
-        if (fs.existsSync(src) && !fs.existsSync(dst)) fs.copyFileSync(src, dst);
-      }
-      console.log(`[desktop] 已从旧目录迁移数据：${LEGACY_USER_DATA} -> ${DEFAULT_USER_DATA}`);
+      // 无论是否真的复制都打标记（写在目标目录），避免以后清空 data/ 又被旧数据回填
+      fs.writeFileSync(marker, `${srcDir}\n${new Date().toISOString()}\n`);
+    } catch (e) {
+      console.error('[desktop] 旧数据迁移失败（继续使用当前目录）：', e);
     }
-    // 无论是否真的复制都打标记，避免以后清空 data/ 又被旧数据回填
-    fs.writeFileSync(LEGACY_MIGRATION_MARKER, new Date().toISOString());
-  } catch (e) {
-    console.error('[desktop] 旧数据迁移失败（继续使用便携目录）：', e);
   }
 }
 

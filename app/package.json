@@ -1,7 +1,7 @@
 {
   "name": "resume-pan",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Resume-Pan - 面向技术从业者的免费在线简历制作工具",
   "scripts": {

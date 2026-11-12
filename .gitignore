@@ -1,9 +1,16 @@
 # 依赖（Web 版 / 桌面版 / 桌面版内的前端副本）
 node_modules/
 
+# 代码签名私钥（含口令的 .pfx/.p12 绝不入库；建议放 desktop/.build-env/certs/）
+*.pfx
+*.p12
+
 # 构建产物
 app/dist/
 desktop/app/dist/
+desktop/build-output/
+desktop/.build-env/
+desktop/release/
 *.tsbuildinfo
 
 # 开发测试产生的临时文件
@@ -36,3 +43,7 @@ desktop/data/
 
 # Windows 保留名误创建的垃圾文件
 nul
+
+# Python 图标生成脚本产生的缓存
+__pycache__/
+*.pyc

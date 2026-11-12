@@ -1,0 +1,73 @@
+# electron-builder 发行配置：现阶段只发布 Windows（x64 / arm64），本地直接打包。
+# 发布链路：cd desktop && npm run pack:win -> desktop/release/ -> 手动上传 Release。
+# GitHub Actions 三端自动发布为后续计划，当前不启用。
+#
+# 【零 C 盘写入】所有下载/缓存/临时/产物都在项目内，由 tools/pack-release.mjs 注入
+# 环境变量（ELECTRON_BUILDER_CACHE / npm_config_cache / TMP / TEMP）并用 CLI 覆盖
+# electronDownload.cache 与 directories.output。本文件里的相对路径只是兜底。
+appId: com.resumepan.desktop
+productName: Resume-Pan
+copyright: Copyright (c) 2026 Resume-Pan contributors
+artifactName: resume-pan-desktop-${version}-${arch}.${ext}
+
+directories:
+  output: .build-env/out
+  buildResources: resources
+  # desktop/app/ 里有前端自己的 package.json，不显式指定的话 electron-builder 会误判成
+  # two-package.json 结构，把 appDir 指到 desktop/app，导致 electron/ 与 app/dist 都打不进来。
+  app: .
+
+# 前端源码 / node_modules / 运行数据都不进包，只带 Electron 壳与构建好的 dist。
+# *.woff 由 tools/pack-release.mjs 的 pruneDist 从 dist 删除（CSS 全部 woff2 优先），
+# 这里的排除规则是二次兜底，防止 --skip-build 时把旧字体又带进 asar。
+files:
+  - electron/**/*
+  - app/dist/**/*
+  - package.json
+  - "!**/node_modules/**/*"
+  - "!**/*.map"
+  - "!**/*.woff"
+  - "!**/*.tsbuildinfo"
+  - "!**/.DS_Store"
+
+asar: true
+# maximum：NSIS 内置的 7z/LZMA 用最高压缩级别（Electron 运行时体积占比最大）
+compression: maximum
+npmRebuild: false
+# 只保留中文与英文 locale.pak，清掉 Electron 自带的其余几十种语言资源
+electronLanguages:
+  - zh-CN
+  - en-US
+
+# electron-builder 26 会刻意忽略 ELECTRON_MIRROR 环境变量，只能在配置里指定下载源；
+# 官方 GitHub Releases 在国内常被代理拦成 502，华为云镜像实测 ~3.7MB/s。
+# isVerifyChecksum=false 跳过 @electron/get 去 GitHub 拉 SHASUMS256.txt（该请求会挂死）。
+# cache：Electron zip 落在项目内（CLI 会覆盖为绝对路径）。
+electronDownload:
+  mirror: https://repo.huaweicloud.com/electron/
+  cache: .build-env/cache/electron
+  isVerifyChecksum: false
+
+win:
+  icon: resources/icon.ico
+  target:
+    - nsis
+    - dir
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Resume-Pan
+  # 生成 .exe.blockmap（差分更新 / 断点续传用），同时让 NSIS 用 7z/LZMA 而非 zip
+  differentialPackage: true
+  deleteAppDataOnUninstall: false
+
+# Linux / macOS 暂不适配（当前只发布 Windows）：
+#  - Linux 的 deb/AppImage/pacman 在 Windows 主机上受符号链接权限与元数据限制，需 Linux runner；
+#  - macOS 的 dmg/签名/公证只能在 macOS 上完成，需 macOS runner。
+
+# 代码签名：按 2026-11-12 的决定不启用，产物为未签名（不做任何 sign / 证书配置）。
+# 若将来改主意，electron-builder 26 用 win.signtoolOptions 或 WIN_CSC_LINK 环境变量。

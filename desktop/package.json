@@ -1,8 +1,10 @@
 {
   "name": "resume-pan-desktop",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Resume-Pan 桌面端（Electron 壳 + Web 版同款渲染/导出链路）",
+  "author": "Resume-Pan contributors",
+  "license": "MIT",
   "main": "electron/main.cjs",
   "scripts": {
     "build": "npm --prefix app run build",
@@ -11,9 +13,15 @@
     "dev": "electron . --dev",
     "smoke": "electron . --smoke",
     "typecheck": "npm --prefix app run typecheck",
-    "test": "npm --prefix app run test"
+    "test": "npm --prefix app run test",
+    "pack:icons": "python tools/make-icons.py",
+    "pack:win": "node tools/pack-release.mjs --only=win",
+    "pack:all": "node tools/pack-release.mjs --only=all",
+    "release": "node tools/make-release.mjs"
   },
   "devDependencies": {
-    "electron": "^44.9.0"
+    "7zip-bin": "^5.2.0",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.18.0"
   }
 }
