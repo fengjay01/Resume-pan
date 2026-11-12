@@ -6,7 +6,7 @@
 
 Resume-Pan is a free resume builder for engineers and technical professionals. It is purely client-side: no accounts, no backend, no analytics, and your resumes never leave the browser. The project ships both a **web app** and an **Electron desktop app**, sharing the same editor, rendering engine, and import/export pipeline. Current version: **0.1.0**.
 
-Windows installers are published on [GitHub Releases](https://github.com/fengjay01/Resume-pan/releases/tag/v0.1.0) (x64 / arm64 installers and portable archives; Windows 10/11 64-bit only).
+Windows installers are published on [GitHub Releases](https://github.com/fengjay01/Resume-pan/releases/tag/0.1.0) (x64 / arm64 installers and portable archives; Windows 10/11 64-bit only).
 
 ## Features
 
@@ -28,7 +28,7 @@ Windows installers are published on [GitHub Releases](https://github.com/fengjay
 | PDF | PDF.js 6 (parsing) · jsPDF + html2canvas (image export) · browser `printToPDF` (vector export) |
 | OCR | Tesseract.js 7 with the Simplified Chinese model (scans only) |
 | Desktop | Electron 44 (Chromium 152), hidden BrowserWindow + `webContents.printToPDF` |
-| Packaging | electron-builder 26 (Windows only, built locally), output in `desktop/releases/v<version>/` |
+| Packaging | electron-builder 26 (Windows only, built locally), output in `desktop/releases/<version>/` |
 
 ## Repository layout
 
@@ -57,7 +57,7 @@ Windows installers are published on [GitHub Releases](https://github.com/fengjay
 │   │   ├── tmp/               Build-time TMP / TEMP
 │   │   └── out/<arch>/        Raw electron-builder output
 │   ├── releases/              Delivery layer: versioned archives (ignored)
-│   │   └── v0.1.0/            All assets for this version; one v<version>/ per release
+│   │   └── 0.1.0/            All assets for this version; one <version>/ per release
 │   ├── data/                  Dev-mode runtime data (resumes / trash / preferences / port memory; ignored)
 │   ├── electron-builder.yml   Build config (Windows only)
 │   └── README-DESKTOP.md      Detailed desktop notes
@@ -102,13 +102,13 @@ node tools/batch-import-check.mjs
 
 ## Download & install (Windows desktop)
 
-Download `v0.1.0` from [Releases](https://github.com/fengjay01/Resume-pan/releases/tag/v0.1.0):
+Download `0.1.0` from [Releases](https://github.com/fengjay01/Resume-pan/releases/tag/0.1.0):
 
 | File | For |
 | --- | --- |
-| `resume-pan-desktop-v0.1.0-x64-Setup.exe` | 64-bit Intel / AMD, Windows 10 / 11 |
-| `resume-pan-desktop-v0.1.0-arm64-Setup.exe` | ARM64 Windows devices |
-| `resume-pan-desktop-v0.1.0-win_<arch>-green.7z` | Portable archive, extract and run |
+| `resume-pan-desktop-0.1.0-x64-Setup.exe` | 64-bit Intel / AMD, Windows 10 / 11 |
+| `resume-pan-desktop-0.1.0-arm64-Setup.exe` | ARM64 Windows devices |
+| `resume-pan-desktop-0.1.0-win_<arch>-green.7z` | Portable archive, extract and run |
 
 - Run the installer (you can choose the folder), or extract the portable archive and launch `Resume-Pan.exe`.
 - Both editions keep resume data in a **`data/` folder next to the executable** — copy the whole folder to carry your data, and uninstalling or reinstalling never deletes it.
@@ -126,15 +126,15 @@ npm --prefix app install    # Frontend dependencies
 npm run build               # tsc + vite build → desktop/app/dist
 npm start                   # Launch the app (local service probes from port 8790)
 npm run smoke               # Headless smoke test (/ping, /export)
-npm run pack:win            # Build Windows x64 / arm64 release → desktop/releases/v<version>/
+npm run pack:win            # Build Windows x64 / arm64 release → desktop/releases/<version>/
 node tools/verify-release.mjs --out=.build-env/out   # Verify artifacts
 ```
 
 Dev mode needs two terminals: `npm run dev:vite` and `npm run dev`.
 
-**Layered directories, zero writes to C:** all downloads, caches, temp files and raw build output stay in `desktop/.build-env/` (Electron archives, NSIS tools, npm cache, TMP/TEMP, per-arch output); only final assets go to `desktop/releases/v<version>/`. `tools/pack-release.mjs` pins these paths inside the project via environment variables and CLI overrides, with `.npmrc` and `.gitignore` as a fallback. Measured before/after: no size change in any C: cache directory.
+**Layered directories, zero writes to C:** all downloads, caches, temp files and raw build output stay in `desktop/.build-env/` (Electron archives, NSIS tools, npm cache, TMP/TEMP, per-arch output); only final assets go to `desktop/releases/<version>/`. `tools/pack-release.mjs` pins these paths inside the project via environment variables and CLI overrides, with `.npmrc` and `.gitignore` as a fallback. Measured before/after: no size change in any C: cache directory.
 
-**Versioned archives / upgrading**: final assets live in `desktop/releases/v<version>/` (`v0.1.0/` today). Bump `version` in `package.json` and run `npm run pack:win` — a new version folder is created and older ones are left untouched. Use `node tools/verify-release.mjs --version=0.1.0` to verify any historical version.
+**Versioned archives / upgrading**: final assets live in `desktop/releases/<version>/` (`0.1.0/` today). Bump `version` in `package.json` and run `npm run pack:win` — a new version folder is created and older ones are left untouched. Use `node tools/verify-release.mjs --version=0.1.0` to verify any historical version.
 
 **Data directory**: dev builds use `desktop/data/`; packaged builds (installer and portable alike) always use `data/` next to the executable — neither writes to the system user-data folder on C:. The old system folder (`%APPDATA%/resume-pan-desktop` on Windows) is a **read-only** migration source, with the migration marker written to the destination. Migration carries `service-port.txt` too: storage is isolated per origin, so a port change makes resumes appear to vanish. This folder contains personal information, is listed in `.gitignore`, and must never be committed. Override it with `RESUME_PAN_DATA_DIR` or from the account page.
 

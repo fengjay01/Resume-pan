@@ -13,7 +13,7 @@
  *   desktop/.build-env/cache/npm/        npm / npx 缓存（npm_config_cache）
  *   desktop/.build-env/tmp/              构建期 TMP/TEMP
  *   desktop/.build-env/out/<arch>/      electron-builder 原始输出
- *   desktop/releases/v<版本>/          最终交付资产（按版本归档，唯一对外产物目录）
+ *   desktop/releases/<版本>/          最终交付资产（按版本归档，唯一对外产物目录）
  *
  * 用法：
  *   npm run pack:win                      # Windows x64 + arm64（推荐）
@@ -202,4 +202,4 @@ console.log(`原始输出：${OUT}`);
 if (failures.length) console.warn(`未成功的目标：${failures.join(', ')}`);
 else console.log('全部目标构建成功');
 const releaseVersion = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
-console.log(`产物目录：${path.join(ROOT, 'releases', `v${releaseVersion}`)}`);
+console.log(`产物目录：${path.join(ROOT, 'releases', releaseVersion)}`);

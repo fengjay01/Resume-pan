@@ -6,7 +6,7 @@
 
 Resume-Pan 是面向技术从业者的免费简历制作工具。纯前端实现，没有账号、没有后端、没有埋点，简历只保存在浏览器本地。项目同时提供 **Web 版** 与 **Electron 桌面版**，两者共用同一套编辑器、渲染引擎和导入导出链路。当前版本 **0.1.0**。
 
-桌面版已发布 Windows 安装包，见 [GitHub Releases](https://github.com/fengjay01/Resume-pan/releases/tag/v0.1.0)（x64 / arm64 安装版与绿色便携版，仅 Windows 10/11 64 位）。
+桌面版已发布 Windows 安装包，见 [GitHub Releases](https://github.com/fengjay01/Resume-pan/releases/tag/0.1.0)（x64 / arm64 安装版与绿色便携版，仅 Windows 10/11 64 位）。
 
 ## 核心能力
 
@@ -28,7 +28,7 @@ Resume-Pan 是面向技术从业者的免费简历制作工具。纯前端实现
 | PDF | PDF.js 6（解析）· jsPDF + html2canvas（图片版导出）· 浏览器 `printToPDF`（矢量导出） |
 | OCR | Tesseract.js 7 + 简体中文模型（仅扫描件） |
 | 桌面端 | Electron 44（Chromium 152），隐藏 BrowserWindow + `webContents.printToPDF` |
-| 打包 | electron-builder 26（仅 Windows，本地构建），产物输出到 `desktop/releases/v<版本>/` |
+| 打包 | electron-builder 26（仅 Windows，本地构建），产物输出到 `desktop/releases/<版本>/` |
 
 ## 目录结构
 
@@ -57,7 +57,7 @@ Resume-Pan 是面向技术从业者的免费简历制作工具。纯前端实现
 │   │   ├── tmp/                构建期 TMP / TEMP
 │   │   └── out/<arch>/         electron-builder 原始输出
 │   ├── releases/              交付层：按版本归档（已忽略）
-│   │   └── v0.1.0/            该版本全部资产；以后每版一个 v<版本>/ 目录
+│   │   └── 0.1.0/            该版本全部资产；以后每版一个 <版本>/ 目录
 │   ├── data/                  开发版运行数据（简历 / 回收站 / 偏好 / 端口记忆，已忽略）
 │   ├── electron-builder.yml   打包配置（仅 Windows）
 │   └── README-DESKTOP.md      桌面版详细说明
@@ -102,13 +102,13 @@ node tools/batch-import-check.mjs
 
 ## 下载与安装（Windows 桌面版）
 
-从 [Releases](https://github.com/fengjay01/Resume-pan/releases/tag/v0.1.0) 下载 `v0.1.0`：
+从 [Releases](https://github.com/fengjay01/Resume-pan/releases/tag/0.1.0) 下载 `0.1.0`：
 
 | 文件 | 适用 |
 | --- | --- |
-| `resume-pan-desktop-v0.1.0-x64-Setup.exe` | 64 位 Intel / AMD，Windows 10 / 11 |
-| `resume-pan-desktop-v0.1.0-arm64-Setup.exe` | ARM64 Windows 设备 |
-| `resume-pan-desktop-v0.1.0-win_<arch>-green.7z` | 绿色便携版，解压即用 |
+| `resume-pan-desktop-0.1.0-x64-Setup.exe` | 64 位 Intel / AMD，Windows 10 / 11 |
+| `resume-pan-desktop-0.1.0-arm64-Setup.exe` | ARM64 Windows 设备 |
+| `resume-pan-desktop-0.1.0-win_<arch>-green.7z` | 绿色便携版，解压即用 |
 
 - 安装版双击 Setup.exe 可自选目录；绿色版解压后运行 `Resume-Pan.exe`。
 - 两种形态的简历数据都放在 **exe 同级 `data/`**，整个应用目录拷走即带走全部数据，卸载 / 覆盖安装不会删除简历。
@@ -126,15 +126,15 @@ npm --prefix app install    # 前端依赖
 npm run build               # tsc + vite build → desktop/app/dist
 npm start                   # 启动应用（本地服务从 8790 起顺延探测）
 npm run smoke               # 无窗口冒烟（/ping、/export）
-npm run pack:win            # 构建 Windows x64 / arm64 Release → desktop/releases/v<版本>/
+npm run pack:win            # 构建 Windows x64 / arm64 Release → desktop/releases/<版本>/
 node tools/verify-release.mjs --out=.build-env/out   # 产物自检
 ```
 
 开发模式需要两个终端：`npm run dev:vite` 与 `npm run dev`。
 
-**目录分层与零 C 盘写入**：打包时所有下载、缓存、临时文件与原始输出都落在 `desktop/.build-env/`（Electron 二进制、NSIS 工具、npm 缓存、TMP/TEMP、逐架构输出），最终资产只进 `desktop/releases/v<版本>/`。`tools/pack-release.mjs` 用环境变量和 CLI 覆盖把这些路径锁在项目内，`.npmrc` 与 `.gitignore` 兜底；实测构建前后 C 盘各缓存目录大小零变化。
+**目录分层与零 C 盘写入**：打包时所有下载、缓存、临时文件与原始输出都落在 `desktop/.build-env/`（Electron 二进制、NSIS 工具、npm 缓存、TMP/TEMP、逐架构输出），最终资产只进 `desktop/releases/<版本>/`。`tools/pack-release.mjs` 用环境变量和 CLI 覆盖把这些路径锁在项目内，`.npmrc` 与 `.gitignore` 兜底；实测构建前后 C 盘各缓存目录大小零变化。
 
-**按版本归档 / 升级迭代**：最终资产统一放 `desktop/releases/v<版本>/`，如当前的 `v0.1.0/`。
+**按版本归档 / 升级迭代**：最终资产统一放 `desktop/releases/<版本>/`，如当前的 `0.1.0/`。
 升级时改 `package.json` 的 `version` 再跑 `npm run pack:win`，会自动新建对应版本目录，
 旧版本目录原样保留；`node tools/verify-release.mjs --version=0.1.0` 可自检任意历史版本。
 

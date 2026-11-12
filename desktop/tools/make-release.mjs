@@ -6,7 +6,7 @@
  *  - 产出 SHA256SUMS.txt 与 manifest.json（大小 / 校验和 / 平台 / 架构 / 类型）
  *
  * 【目录分层】读取 .build-env/out/<arch>/ 下的原始产物，只把最终资产写进
- * releases/v<版本>/（按版本归档；升级时改 package.json 的 version 即自动新建目录）。
+ * releases/<版本>/（按版本归档；升级时改 package.json 的 version 即自动新建目录）。
  * 逐架构独立构建后每个子目录各有一份 latest.yml / builder-debug.yml，按架构改名避免覆盖。
  * 可重复运行：原始产物保留在 .build-env/out/，整理步骤随时可重跑。
  */
@@ -24,10 +24,10 @@ const OUT = path.join(ROOT, outArg ? outArg.slice('--out='.length) : '.build-env
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const NAME = pkg.name;
 const VERSION = pkg.version;
-// 【按版本归档】最终资产统一放 desktop/releases/v<版本>/。
+// 【按版本归档】最终资产统一放 desktop/releases/<版本>/。
 // 升级迭代只需改 package.json 的 version 再跑 pack:win，会自动新建对应目录；
 // 历史版本目录原样保留，互不覆盖。
-const RELEASE = path.join(ROOT, 'releases', `v${VERSION}`);
+const RELEASE = path.join(ROOT, 'releases', VERSION);
 const ONLY = (() => {
   const a = process.argv.find((x) => x.startsWith('--only='));
   return a ? a.slice('--only='.length) : 'all';
@@ -81,10 +81,10 @@ function classify(file) {
   const hasArch = /(arm64|aarch64|armv7l|x64|amd64|ia32|x86|universal)/i.test(name);
   const arch = hasArch ? archOf(name) : (archTag ?? 'universal');
   if (low.endsWith('.exe.blockmap')) {
-    return { dest: `${NAME}-v${VERSION}-${arch}-Setup.exe.blockmap`, info: { platform: 'win', arch, kind: 'blockmap' } };
+    return { dest: `${NAME}-${VERSION}-${arch}-Setup.exe.blockmap`, info: { platform: 'win', arch, kind: 'blockmap' } };
   }
   if (low.endsWith('.exe')) {
-    return { dest: `${NAME}-v${VERSION}-${arch}-Setup.exe`, info: { platform: 'win', arch, kind: 'nsis' } };
+    return { dest: `${NAME}-${VERSION}-${arch}-Setup.exe`, info: { platform: 'win', arch, kind: 'nsis' } };
   }
   if (/^(latest|builder-debug).*\.yml$/i.test(name)) {
     const tag = archTag ? `-${archTag}` : '';
@@ -159,7 +159,7 @@ function buildGreenArchives() {
       warn(`${path.basename(bundle)} 缺少 resources/app.asar，跳过绿色版`);
       continue;
     }
-    const dest = `${NAME}-v${VERSION}-win_${arch}-green.7z`;
+    const dest = `${NAME}-${VERSION}-win_${arch}-green.7z`;
     const out = path.join(RELEASE, dest);
     const marker = path.join(bundle, 'portable.txt');
     const dataDir = path.join(bundle, 'data');

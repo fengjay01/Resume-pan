@@ -41,24 +41,24 @@ node tools/verify-release.mjs   # 产物自检：/ping、/export PDF、便携 da
 ```
 
 **Windows 直接用本地 Windows electron-builder 打包发布**，不依赖 CI：跑完
-`npm run pack:win`，用 `gh release create`（走 GitHub API）把 `desktop/releases/v<版本>/` 里的资产上传到
+`npm run pack:win`，用 `gh release create`（走 GitHub API）把 `desktop/releases/<版本>/` 里的资产上传到
 Release 即可。发布当时 `git push` 到 github.com 曾被本机代理拦成 502（稍后重试即通），
-`api.github.com` / `uploads.github.com` 全程可用；**代码已提交并推送**，tag `v0.1.0`
+`api.github.com` / `uploads.github.com` 全程可用；**代码已提交并推送**，tag `0.1.0`
 与 `main` 保持一致。当前版本 **0.1.0**（2026-11-12 已发布首个 Release）。
 
-**Release 命名约定**：tag 与显示标题都用**纯版本号** `v<版本>`（如 `v0.1.0`），
-不加产品名前缀；说明正文首行也写 `# v<版本>`。以后每个版本照此办理：
+**Release 命名约定**：tag 与显示标题都用**纯版本号** `<版本>`（如 `0.1.0`），
+不加产品名前缀；说明正文首行也写 `# <版本>`。以后每个版本照此办理：
 
 ```bash
 cd desktop
-gh release create v0.2.0 --repo fengjay01/Resume-pan --target main \
-  --title "v0.2.0" --notes-file .build-env/release-notes.md \
-  releases/v0.2.0/*.exe releases/v0.2.0/*.blockmap releases/v0.2.0/*.7z
+gh release create 0.2.0 --repo fengjay01/Resume-pan --target main \
+  --title "0.2.0" --notes-file .build-env/release-notes.md \
+  releases/0.2.0/*.exe releases/0.2.0/*.blockmap releases/0.2.0/*.7z
 ```
 
 `--target main` 让 tag 落在当前主分支；若要让 tag 指向某次特定提交，换成完整 SHA。
-修改已发布 Release 的标题用 `gh release edit v0.1.0 --title "v0.1.0"`，
-移动 tag 用 `gh api -X PATCH .../git/refs/tags/v0.1.0 -f sha=<SHA> -F force=true`
+修改已发布 Release 的标题用 `gh release edit 0.1.0 --title "0.1.0"`，
+移动 tag 用 `gh api -X PATCH .../git/refs/tags/0.1.0 -f sha=<SHA> -F force=true`
 并同步 `PATCH .../releases/{id}` 的 `target_commitish`（资产不受影响）。
 
 ### 目录分层：所有产物 / 下载 / 缓存都在项目目录内，绝不写 C 盘
@@ -78,7 +78,7 @@ desktop/
 │   ├── tmp/                构建与运行期 TMP / TEMP
 │   └── out/<arch>/         electron-builder 原始输出（x64/、arm64/ 各自独立）
 └── releases/               【交付层】按版本归档（已 gitignore）
-    └── v0.1.0/            该版本全部资产；以后每版一个 v<版本>/ 目录
+    └── 0.1.0/            该版本全部资产；以后每版一个 <版本>/ 目录
 ```
 
 `tools/pack-release.mjs` 在构建子进程统一注入 `ELECTRON_BUILDER_CACHE`、
@@ -89,7 +89,7 @@ desktop/
 **运行时数据也不再写系统 AppData**：打包版一律 exe 同级 `data/`，旧系统目录只作只读迁移源。
 
 **按版本归档（升级迭代）**：`tools/make-release.mjs` 按 `package.json` 的 `version` 把资产
-写到 `desktop/releases/v<版本>/`（当前 `v0.1.0/`），`SHA256SUMS.txt` 与 `manifest.json`
+写到 `desktop/releases/<版本>/`（当前 `0.1.0/`），`SHA256SUMS.txt` 与 `manifest.json`
 也在该目录内。升级时改 `version` 再跑 `npm run pack:win` 即自动新建版本目录，旧版本
 原样保留；`node tools/verify-release.mjs --version=0.1.0` 可自检任意历史版本。
 
@@ -107,7 +107,7 @@ desktop/
 
 | 平台 | 架构 | 资产 |
 | --- | --- | --- |
-| Windows | x64 / arm64 | `resume-pan-desktop-v<版本>-<arch>-Setup.exe` + `.exe.blockmap`、`resume-pan-desktop-v<版本>-win_<arch>-green.7z` |
+| Windows | x64 / arm64 | `resume-pan-desktop-<版本>-<arch>-Setup.exe` + `.exe.blockmap`、`resume-pan-desktop-<版本>-win_<arch>-green.7z` |
 | 元数据 | — | `builder-debug-<arch>.yml`、`SHA256SUMS.txt`、`manifest.json` |
 
 未配置自动更新服务，因此不生成 `latest.yml`；需要时加 `publish` 配置即可。

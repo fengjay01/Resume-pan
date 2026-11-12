@@ -4,7 +4,7 @@
  *  1) Windows bundle： exe --smoke 起本地服务 -> /ping -> POST /export 校验返回 PDF
  *  2) 绿色 7z：解包 -> 运行 -> 校验数据落在解压目录 data/（便携语义）
  *  3) 各资产魔数 / 结构静态校验（Linux 包无法在 Windows 实机跑，只做格式校验）
- * 报告写入 .build-env/out/verify-report.json；不修改 releases/v<版本>/ 里的资产。
+ * 报告写入 .build-env/out/verify-report.json；不修改 releases/<版本>/ 里的资产。
  * 可用 --version=x.y.z 指定要自检的历史版本目录。
  * 运行 exe 时的 TMP/TEMP 也指向项目内，避免 Chromium 往 C 盘写临时文件。
  */
@@ -22,7 +22,7 @@ const OUT = path.join(ROOT, outArg ? outArg.slice('--out='.length) : '.build-env
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const verArg = process.argv.find((x) => x.startsWith('--version='));
 const VERSION = verArg ? verArg.slice('--version='.length) : pkg.version;
-const RELEASE = path.join(ROOT, 'releases', `v${VERSION}`);
+const RELEASE = path.join(ROOT, 'releases', VERSION);
 const report = { checks: [], ok: true, notes: [] };
 
 const cleanEnv = { ...process.env };
